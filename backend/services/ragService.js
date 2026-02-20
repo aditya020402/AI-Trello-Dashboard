@@ -3,28 +3,22 @@ const { query } = require('../db');
 
 class RAGService {
   constructor() {
-    this.openai = null;
     this.chatClient = null;
     this.embeddingClient = null;
   }
 
   getProviderConfig() {
-    const openAiApiKey = process.env.OPENAI_API_KEY;
     const azureEndpoint = process.env.AZURE_OPENAI_ENDPOINT;
     const azureApiKey = process.env.AZURE_OPENAI_API_KEY;
     const azureApiVersion = process.env.AZURE_OPENAI_API_VERSION || '2024-02-15-preview';
     const azureChatDeployment = process.env.AZURE_OPENAI_CHAT_DEPLOYMENT;
     const azureEmbeddingDeployment = process.env.AZURE_OPENAI_EMBEDDING_DEPLOYMENT;
 
-    const isAzure = Boolean(azureEndpoint && azureApiKey);
-
-    if (!isAzure && !openAiApiKey) {
-      throw new Error('No AI provider configured. Set OPENAI_API_KEY or AZURE_OPENAI_* variables');
+    if (!azureEndpoint || !azureApiKey) {
+      throw new Error('Azure OpenAI not configured. Set AZURE_OPENAI_ENDPOINT and AZURE_OPENAI_API_KEY');
     }
 
     return {
-      isAzure,
-      openAiApiKey,
       azureEndpoint,
       azureApiKey,
       azureApiVersion,
@@ -34,43 +28,24 @@ class RAGService {
   }
 
   getEmbeddingModel() {
-    const { isAzure, azureEmbeddingDeployment } = this.getProviderConfig();
-    if (isAzure) {
-      if (!azureEmbeddingDeployment) {
-        throw new Error('AZURE_OPENAI_EMBEDDING_DEPLOYMENT is required for Azure');
-      }
-      return azureEmbeddingDeployment;
+    const { azureEmbeddingDeployment } = this.getProviderConfig();
+    if (!azureEmbeddingDeployment) {
+      throw new Error('AZURE_OPENAI_EMBEDDING_DEPLOYMENT is required');
     }
-    return process.env.OPENAI_EMBEDDING_MODEL || 'text-embedding-3-small';
+    return azureEmbeddingDeployment;
   }
 
   getChatModel() {
-    const { isAzure, azureChatDeployment } = this.getProviderConfig();
-    if (isAzure) {
-      if (!azureChatDeployment) {
-        throw new Error('AZURE_OPENAI_CHAT_DEPLOYMENT is required for Azure');
-      }
-      return azureChatDeployment;
+    const { azureChatDeployment } = this.getProviderConfig();
+    if (!azureChatDeployment) {
+      throw new Error('AZURE_OPENAI_CHAT_DEPLOYMENT is required');
     }
-    return process.env.OPENAI_CHAT_MODEL || 'gpt-4o-mini';
-  }
-
-  // Keep default OpenAI client for non-Azure
-  getOpenAIClient() {
-    if (!this.openai) {
-      const { openAiApiKey } = this.getProviderConfig();
-      this.openai = new OpenAI({ apiKey: openAiApiKey });
-    }
-    return this.openai;
+    return azureChatDeployment;
   }
 
   getEmbeddingClient() {
-    const config = this.getProviderConfig();
-    if (!config.isAzure) {
-      return this.getOpenAIClient();
-    }
-
     if (!this.embeddingClient) {
+      const config = this.getProviderConfig();
       const endpoint = config.azureEndpoint.replace(/\/$/, '');
       this.embeddingClient = new OpenAI({
         apiKey: config.azureApiKey,
@@ -84,12 +59,8 @@ class RAGService {
   }
 
   getChatClient() {
-    const config = this.getProviderConfig();
-    if (!config.isAzure) {
-      return this.getOpenAIClient();
-    }
-
     if (!this.chatClient) {
+      const config = this.getProviderConfig();
       const endpoint = config.azureEndpoint.replace(/\/$/, '');
       this.chatClient = new OpenAI({
         apiKey: config.azureApiKey,

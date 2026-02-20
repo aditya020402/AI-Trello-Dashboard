@@ -1,0 +1,155 @@
+.streak-calendar-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.streak-calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.streak-month-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.streak-month-controls h3 {
+  margin: 0;
+  font-size: 20px;
+  letter-spacing: 1px;
+  color: #4b5563;
+}
+
+.streak-month-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  background: #f3f4f6;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.streak-month-btn:hover {
+  background: #e5e7eb;
+}
+
+.streak-count-badge {
+  background: #fff7ed;
+  color: #ea580c;
+  border: 1px solid #fed7aa;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.streak-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.streak-weekdays span {
+  text-align: center;
+  color: #9ca3af;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.streak-days-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.streak-empty-slot {
+  height: 42px;
+}
+
+.streak-day {
+  position: relative;
+  height: 42px;
+  border: none;
+  border-radius: 999px;
+  background: #f9fafb;
+  color: #6b7280;
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.streak-day:hover:not(:disabled) {
+  background: #ffedd5;
+  color: #ea580c;
+}
+
+.streak-day.completed {
+  background: #ffedd5;
+  color: #ea580c;
+}
+
+.streak-day.today {
+  outline: 2px solid #f59e0b;
+  outline-offset: 2px;
+}
+
+.streak-day.future,
+.streak-day.past {
+  cursor: not-allowed;
+}
+
+.streak-day.future {
+  opacity: 0.5;
+}
+
+.streak-day.past:not(.completed) {
+  opacity: 0.6;
+}
+
+.streak-day-tick {
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #f59e0b;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.2s;
+}
+
+.streak-day-tick.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+@media (max-width: 768px) {
+  .streak-calendar-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .streak-day {
+    height: 38px;
+  }
+}

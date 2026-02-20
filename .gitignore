@@ -1,0 +1,69 @@
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Testing
+/coverage
+
+# Production
+/build
+/dist
+/frontend/dist
+
+# Misc
+.env
+.env.local
+.env.example
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.prettierignore
+
+# OS
+Thumbs.db
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Temporary files
+tmp/
+temp/
+
+# Docker
+.dockerignore
+
+# Database backup files
+database/taskboard_backup_*.sql
+*.sql.bak
+

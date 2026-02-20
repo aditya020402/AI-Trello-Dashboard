@@ -1,0 +1,715 @@
+/* Board Card */
+.board-card {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.board-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.board-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.6) 100%);
+  display: flex;
+  align-items: flex-end;
+  padding: 20px;
+  justify-content: space-between;
+}
+
+.board-card-overlay h3 {
+  margin: 0;
+  color: white;
+  font-size: 18px;
+  font-weight: 700;
+  flex: 1;
+  word-break: break-word;
+}
+
+.board-delete-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  flex-shrink: 0;
+  margin-left: 10px;
+}
+
+.board-delete-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* List Column */
+.list-column {
+  flex-shrink: 0;
+  width: 300px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 250px);
+}
+
+.list-header {
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.list-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a1a;
+  flex: 1;
+  word-break: break-word;
+}
+
+.list-delete-btn {
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  transition: color 0.2s;
+  padding: 5px;
+}
+
+.list-delete-btn:hover {
+  color: #c33;
+}
+
+.list-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+  min-height: 300px;
+  transition: background-color 0.2s;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.list-content::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+.list-content.drag-over {
+  background-color: #f0f9ff;
+  border: 2px dashed #3b82f6;
+}
+
+.cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.loading-small {
+  text-align: center;
+  padding: 20px;
+  color: #999;
+  font-size: 12px;
+}
+
+.empty-list {
+  text-align: center;
+  padding: 30px 10px;
+  color: #ccc;
+  font-size: 13px;
+}
+
+.list-footer {
+  padding: 10px;
+  border-top: 1px solid #eee;
+}
+
+.btn-add-card {
+  width: 100%;
+  padding: 10px;
+  background-color: #f5f5f5;
+  border: 1px dashed #ddd;
+  border-radius: 6px;
+  color: #666;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.btn-add-card:hover {
+  background-color: #eee;
+  border-color: #ccc;
+  color: #333;
+}
+
+/* Card Item */
+.card-item {
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  padding: 12px;
+  cursor: grab;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.card-item:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-color: #ddd;
+}
+
+.card-item.dragging {
+  opacity: 0.5;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.card-drag-handle {
+  color: #ddd;
+  display: flex;
+  align-items: center;
+  padding-top: 2px;
+  flex-shrink: 0;
+  cursor: grab;
+  transition: color 0.2s;
+}
+
+.card-drag-handle:active {
+  cursor: grabbing;
+}
+
+.card-item:hover .card-drag-handle {
+  color: #bbb;
+}
+
+.card-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.card-content h4 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a1a;
+  word-break: break-word;
+}
+
+.card-content p {
+  margin: 0;
+  font-size: 12px;
+  color: #666;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.card-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.card-edit-btn {
+  background: none;
+  border: none;
+  color: #ddd;
+  cursor: pointer;
+  transition: color 0.2s;
+  padding: 3px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-edit-btn:hover {
+  color: #667eea;
+}
+
+.card-chat-btn {
+  background: none;
+  border: none;
+  color: #ddd;
+  cursor: pointer;
+  transition: color 0.2s;
+  padding: 3px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card-chat-btn:hover {
+  color: #667eea;
+}
+
+.card-delete-btn {
+  background: none;
+  border: none;
+  color: #ddd;
+  cursor: pointer;
+  transition: color 0.2s;
+  padding: 3px;
+  flex-shrink: 0;
+}
+
+.card-delete-btn:hover {
+  color: #c33;
+}
+
+/* Card Edit Mode */
+.card-item.editing {
+  background: #f9fafb;
+  border-color: #667eea;
+  padding: 0;
+  cursor: default;
+  display: block;
+}
+
+.card-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+}
+
+.card-edit-title {
+  width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  outline: none;
+  transition: border-color 0.2s;
+  font-family: inherit;
+}
+
+.card-edit-title:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.card-edit-description {
+  width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 8px;
+  font-size: 12px;
+  outline: none;
+  transition: border-color 0.2s;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 60px;
+}
+
+.card-edit-description:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.card-edit-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.card-edit-save,
+.card-edit-cancel {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+}
+
+.card-edit-save {
+  background: #667eea;
+  color: white;
+}
+
+.card-edit-save:hover:not(:disabled) {
+  background: #5568d3;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.card-edit-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.card-edit-cancel {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.card-edit-cancel:hover:not(:disabled) {
+  background: #d1d5db;
+}
+
+.card-edit-cancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Forms */
+.create-list-form,
+.create-card-form {
+  background: white;
+  border-radius: 6px;
+  padding: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.create-list-form form,
+.create-card-form form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.create-list-form input,
+.create-card-form input,
+.create-card-form textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.create-list-form input:focus,
+.create-card-form input:focus,
+.create-card-form textarea:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-sm {
+  padding: 8px 12px !important;
+  font-size: 13px !important;
+  gap: 6px !important;
+}
+
+.btn-primary.btn-sm {
+  flex: 1;
+}
+
+.btn-secondary.btn-sm {
+  flex: 1;
+  background: #f0f0f0;
+  color: #333;
+}
+
+.btn-secondary.btn-sm:hover {
+  background: #e0e0e0;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30px;
+  border-bottom: 1px solid #eee;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  transition: color 0.2s;
+  padding: 5px;
+}
+
+.modal-close-btn:hover {
+  color: #333;
+}
+
+.modal-content > form {
+  padding: 30px;
+}
+
+.modal-footer {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding: 30px;
+  border-top: 1px solid #eee;
+}
+
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 10px;
+}
+
+.image-option {
+  aspect-ratio: 4 / 3;
+  border: 3px solid #eee;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.image-option:hover {
+  border-color: #ccc;
+}
+
+.image-option.selected {
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+}
+
+.image-option img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Create Board Modal - Modern Design */
+.create-board-modal {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: 440px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.create-board-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.create-board-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.modal-close-btn-red {
+  width: 32px;
+  height: 32px;
+  background: #ef4444;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.modal-close-btn-red:hover {
+  background: #dc2626;
+}
+
+.modal-close-btn-red:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.create-board-form {
+  padding: 24px;
+}
+
+.background-image-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.background-image-option {
+  aspect-ratio: 4 / 3;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  border: 2px solid transparent;
+}
+
+.background-image-option:hover {
+  transform: scale(1.02);
+}
+
+.background-image-option.selected {
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2);
+}
+
+.background-image-option img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.selected-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(14, 165, 233, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.board-title-section {
+  margin-bottom: 20px;
+}
+
+.board-title-section label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 8px;
+}
+
+.board-title-input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #1f2937;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.board-title-input:focus {
+  outline: none;
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+}
+
+.board-title-input:disabled {
+  background: #f9fafb;
+  cursor: not-allowed;
+}
+
+.btn-create-board {
+  width: 100%;
+  padding: 14px 20px;
+  background: #1f2937;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-create-board:hover:not(:disabled) {
+  background: #111827;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-create-board:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-create-board .spinner {
+  width: 18px;
+  height: 18px;
+}

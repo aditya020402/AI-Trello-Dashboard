@@ -4,18 +4,102 @@ const { query } = require('../db');
 class RAGService {
   constructor() {
     this.openai = null;
+    this.chatClient = null;
+    this.embeddingClient = null;
   }
 
-  // Initialize OpenAI client
+  getProviderConfig() {
+    const openAiApiKey = process.env.OPENAI_API_KEY;
+    const azureEndpoint = process.env.AZURE_OPENAI_ENDPOINT;
+    const azureApiKey = process.env.AZURE_OPENAI_API_KEY;
+    const azureApiVersion = process.env.AZURE_OPENAI_API_VERSION || '2024-02-15-preview';
+    const azureChatDeployment = process.env.AZURE_OPENAI_CHAT_DEPLOYMENT;
+    const azureEmbeddingDeployment = process.env.AZURE_OPENAI_EMBEDDING_DEPLOYMENT;
+
+    const isAzure = Boolean(azureEndpoint && azureApiKey);
+
+    if (!isAzure && !openAiApiKey) {
+      throw new Error('No AI provider configured. Set OPENAI_API_KEY or AZURE_OPENAI_* variables');
+    }
+
+    return {
+      isAzure,
+      openAiApiKey,
+      azureEndpoint,
+      azureApiKey,
+      azureApiVersion,
+      azureChatDeployment,
+      azureEmbeddingDeployment,
+    };
+  }
+
+  getEmbeddingModel() {
+    const { isAzure, azureEmbeddingDeployment } = this.getProviderConfig();
+    if (isAzure) {
+      if (!azureEmbeddingDeployment) {
+        throw new Error('AZURE_OPENAI_EMBEDDING_DEPLOYMENT is required for Azure');
+      }
+      return azureEmbeddingDeployment;
+    }
+    return process.env.OPENAI_EMBEDDING_MODEL || 'text-embedding-3-small';
+  }
+
+  getChatModel() {
+    const { isAzure, azureChatDeployment } = this.getProviderConfig();
+    if (isAzure) {
+      if (!azureChatDeployment) {
+        throw new Error('AZURE_OPENAI_CHAT_DEPLOYMENT is required for Azure');
+      }
+      return azureChatDeployment;
+    }
+    return process.env.OPENAI_CHAT_MODEL || 'gpt-4o-mini';
+  }
+
+  // Keep default OpenAI client for non-Azure
   getOpenAIClient() {
     if (!this.openai) {
-      const apiKey = 
-      if (!apiKey) {
-        throw new Error('OpenAI API key is not configured');
-      }
-      this.openai = new OpenAI({ apiKey: });
+      const { openAiApiKey } = this.getProviderConfig();
+      this.openai = new OpenAI({ apiKey: openAiApiKey });
     }
     return this.openai;
+  }
+
+  getEmbeddingClient() {
+    const config = this.getProviderConfig();
+    if (!config.isAzure) {
+      return this.getOpenAIClient();
+    }
+
+    if (!this.embeddingClient) {
+      const endpoint = config.azureEndpoint.replace(/\/$/, '');
+      this.embeddingClient = new OpenAI({
+        apiKey: config.azureApiKey,
+        baseURL: `${endpoint}/openai/deployments/${config.azureEmbeddingDeployment}`,
+        defaultQuery: { 'api-version': config.azureApiVersion },
+        defaultHeaders: { 'api-key': config.azureApiKey },
+      });
+    }
+
+    return this.embeddingClient;
+  }
+
+  getChatClient() {
+    const config = this.getProviderConfig();
+    if (!config.isAzure) {
+      return this.getOpenAIClient();
+    }
+
+    if (!this.chatClient) {
+      const endpoint = config.azureEndpoint.replace(/\/$/, '');
+      this.chatClient = new OpenAI({
+        apiKey: config.azureApiKey,
+        baseURL: `${endpoint}/openai/deployments/${config.azureChatDeployment}`,
+        defaultQuery: { 'api-version': config.azureApiVersion },
+        defaultHeaders: { 'api-key': config.azureApiKey },
+      });
+    }
+
+    return this.chatClient;
   }
 
   /**
@@ -46,11 +130,12 @@ class RAGService {
    * Create embedding for a text chunk
    */
   async createEmbedding(text) {
-    const openai = this.getOpenAIClient();
+    const embeddingClient = this.getEmbeddingClient();
+    const embeddingModel = this.getEmbeddingModel();
     
     try {
-      const response = await openai.embeddings.create({
-        model: 'text-embedding-3-small',
+      const response = await embeddingClient.embeddings.create({
+        model: embeddingModel,
         input: text,
       });
       
@@ -66,7 +151,8 @@ class RAGService {
    * Processes immediately without waiting for larger batches
    */
   async createBatchEmbeddings(texts, batchSize = 10) {
-    const openai = this.getOpenAIClient();
+    const embeddingClient = this.getEmbeddingClient();
+    const embeddingModel = this.getEmbeddingModel();
     const allEmbeddings = [];
     const startTime = Date.now();
     
@@ -82,8 +168,8 @@ class RAGService {
         console.log(`[EMBED] Processing batch ${batchNum}/${totalBatches} (${batch.length} items)...`);
         
         const response = await this.retryWithBackoff(async () => {
-          return await openai.embeddings.create({
-            model: 'text-embedding-3-small',
+          return await embeddingClient.embeddings.create({
+            model: embeddingModel,
             input: batch,
           });
         });
@@ -274,7 +360,8 @@ class RAGService {
    */
   async answerQuestion(ragConfigId, question) {
     try {
-      const openai = this.getOpenAIClient();
+      const chatClient = this.getChatClient();
+      const chatModel = this.getChatModel();
       
       // Find relevant chunks
       const relevantChunks = await this.findSimilarChunks(ragConfigId, question, 5);
@@ -299,8 +386,8 @@ Use the following context to answer the user's question. If the context doesn't 
 Context:
 ${context}`;
 
-      const completion = await openai.chat.completions.create({
-        model: 'gpt-3.5-turbo',
+      const completion = await chatClient.chat.completions.create({
+        model: chatModel,
         messages: [
           { role: 'system', content: systemMessage },
           { role: 'user', content: question }
@@ -324,6 +411,9 @@ ${context}`;
       };
     } catch (error) {
       console.error('Error answering question:', error);
+      if (error?.message?.includes('chatCompletion operation does not work with the specified model')) {
+        throw new Error('Configured chat model/deployment is invalid for chat completions. Check OPENAI_CHAT_MODEL or AZURE_OPENAI_CHAT_DEPLOYMENT.');
+      }
       throw error;
     }
   }

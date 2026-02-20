@@ -318,3 +318,61 @@ FROM cards c LEFT JOIN lists l ON c.list_id = l.id WHERE l.id IS NULL;
 -- ============================================================================
 
 SELECT 'Database migration completed successfully!' AS status;
+
+
+
+BEGIN;
+
+-- Rename old columns if present (safe, conditional)
+DO $$
+BEGIN
+  -- lists.name -> lists.title
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'lists' AND column_name = 'name'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'lists' AND column_name = 'title'
+  ) THEN
+    ALTER TABLE lists RENAME COLUMN name TO title;
+  END IF;
+
+  -- lists.position -> lists.order_index
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'lists' AND column_name = 'position'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'lists' AND column_name = 'order_index'
+  ) THEN
+    ALTER TABLE lists RENAME COLUMN position TO order_index;
+  END IF;
+
+  -- cards.position -> cards.order_index
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'cards' AND column_name = 'position'
+  ) AND NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'cards' AND column_name = 'order_index'
+  ) THEN
+    ALTER TABLE cards RENAME COLUMN position TO order_index;
+  END IF;
+END $$;
+
+-- Ensure required columns exist even if rename did not happen
+ALTER TABLE lists
+  ADD COLUMN IF NOT EXISTS title VARCHAR(255),
+  ADD COLUMN IF NOT EXISTS order_index INTEGER DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+
+ALTER TABLE cards
+  ADD COLUMN IF NOT EXISTS order_index INTEGER DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+
+-- Helpful indexes for your queries
+CREATE INDEX IF NOT EXISTS idx_lists_board_order ON lists(board_id, order_index);
+CREATE INDEX IF NOT EXISTS idx_cards_list_order ON cards(list_id, order_index);
+
+COMMIT;
+

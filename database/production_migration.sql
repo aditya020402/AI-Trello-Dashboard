@@ -20,12 +20,15 @@ CREATE DATABASE IF NOT EXISTS taskboard;
 CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
   username VARCHAR(255) UNIQUE NOT NULL,
-  email VARCHAR(255) UNIQUE NOT NULL,
-  password VARCHAR(255) NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  email VARCHAR(255) UNIQUE,
+  profile_photo_url TEXT,
+  status VARCHAR(50) DEFAULT 'available',
+  bio TEXT,
+  is_dyslexic BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  dyslexic_mode BOOLEAN DEFAULT false
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
 -- Workspaces table
 CREATE TABLE IF NOT EXISTS workspaces (
   id SERIAL PRIMARY KEY,

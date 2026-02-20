@@ -436,3 +436,29 @@ CREATE INDEX IF NOT EXISTS idx_cards_assigned_to ON cards(assigned_to);
 
 COMMIT;
 
+
+
+BEGIN;
+
+-- 1) user_gitlab_tokens: needed for ON CONFLICT (user_id)
+ALTER TABLE user_gitlab_tokens
+  ADD CONSTRAINT user_gitlab_tokens_user_id_key UNIQUE (user_id);
+
+-- 2) user_daily_streaks: needed for ON CONFLICT (user_id, streak_date)
+ALTER TABLE user_daily_streaks
+  ADD CONSTRAINT user_daily_streaks_user_id_streak_date_key UNIQUE (user_id, streak_date);
+
+-- 3) rag_indexed_resources: needed for ON CONFLICT (rag_config_id, resource_type, resource_id)
+ALTER TABLE rag_indexed_resources
+  ADD CONSTRAINT rag_indexed_resources_unique_resource UNIQUE (rag_config_id, resource_type, resource_id);
+
+-- 4) gitlab_workspace_config: needed for ON CONFLICT (workspace_id, gitlab_project_id)
+-- If old schema has UNIQUE(workspace_id), drop it first
+ALTER TABLE gitlab_workspace_config
+  DROP CONSTRAINT IF EXISTS gitlab_workspace_config_workspace_id_key;
+
+ALTER TABLE gitlab_workspace_config
+  ADD CONSTRAINT gitlab_workspace_config_workspace_project_key UNIQUE (workspace_id, gitlab_project_id);
+
+COMMIT;
+
